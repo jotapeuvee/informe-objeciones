@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Objeciones">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F4F5F7">
+<title>Informe de objeciones</title>
+<style>
+/* Layout: one narrow column, a two-tab switch (new report / all reports), form grouped by moment of the meeting. */
+:root {
+  --bg: #F4F5F7;
+  --surface: #FFFFFF;
+  --field: #FFFFFF;
+  --ink: #14171C;
+  --muted: #5D6572;
+  --line: #DCE0E6;
+  --accent: #1F4FD1;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E6ECFB;
+  --danger: #B42318;
+  --ok: #1D7A46;
+  --focus: rgba(31, 79, 209, .28);
+  --f-display: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --f-body: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --f-mono: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1216; --surface: #171B21; --field: #12161B; --ink: #E8EBF0; --muted: #98A1AD;
+    --line: #2A3039; --accent: #84A1FF; --accent-ink: #0F1216; --accent-soft: #1C2540;
+    --danger: #F97066; --ok: #5BD08A; --focus: rgba(132, 161, 255, .32); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1216; --surface: #171B21; --field: #12161B; --ink: #E8EBF0; --muted: #98A1AD;
+  --line: #2A3039; --accent: #84A1FF; --accent-ink: #0F1216; --accent-soft: #1C2540;
+  --danger: #F97066; --ok: #5BD08A; --focus: rgba(132, 161, 255, .32); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+html { scrollbar-gutter: stable; overflow-y: scroll; }
+/* Mobile: lock horizontal movement, no auto-zoom on focus (inputs >= 16px). */
+html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-x: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { touch-action: pan-y; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; padding-inline: 16px; padding-block: 28px 64px; }
+.wrap { max-width: 660px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+header { display: flex; flex-direction: column; gap: 6px; }
+.eyebrow { margin: 0; font-family: var(--f-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: clamp(28px, 6vw, 36px); line-height: 1.1; letter-spacing: -.01em; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 52ch; }
+
+.tabs { display: inline-flex; gap: 4px; padding: 4px; margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; align-self: flex-start; }
+.tabs button { font: 500 14px var(--f-body); color: var(--muted); background: none; border: 0; padding: 7px 14px; border-radius: 7px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.tabs .n { font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; opacity: .8; }
+
+.notice { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 14px; }
+.notice.err { border-color: var(--danger); color: var(--danger); }
+
+form { display: flex; flex-direction: column; gap: 28px; }
+fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+legend { padding: 0; margin-bottom: 14px; font-family: var(--f-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; gap: 10px; align-items: center; width: 100%; }
+legend::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 520px) { .row { grid-template-columns: minmax(0, 1fr); } }
+input[type="date"] { min-height: 44px; text-align: left; }
+input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+.chip input[type="checkbox"] { width: 1px; min-height: 0; padding: 0; border: 0; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+label { font-weight: 600; font-size: 14px; }
+label .req { color: var(--accent); margin-left: 2px; }
+.hint { margin: -2px 0 0; font-size: 13px; color: var(--muted); }
+input, textarea { width: 100%; max-width: 100%; min-width: 0; display: block; -webkit-appearance: none; appearance: none; font: 400 16px var(--f-body); color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+textarea { min-height: 92px; resize: vertical; line-height: 1.5; }
+input[type="number"], input[type="date"] { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+input:focus, textarea:focus, button:focus-visible, summary:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus); }
+.money { position: relative; }
+.money input { padding-right: 34px; }
+.money span { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-family: var(--f-mono); pointer-events: none; }
+.lbl { font-weight: 600; font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chip span { display: inline-block; padding: 8px 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--field); color: var(--ink); font-weight: 500; font-size: 14px; cursor: pointer; user-select: none; }
+.chip input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.chip input:focus-visible + span { box-shadow: 0 0 0 3px var(--focus); }
+.invalid { border-color: var(--danger) !important; }
+
+.editing { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-radius: 10px; background: var(--accent-soft); font-size: 14px; }
+
+.actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.btn { font: 600 15px var(--f-body); border-radius: 8px; padding: 11px 20px; cursor: pointer; border: 1px solid transparent; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.btn-ghost { background: none; color: var(--ink); border-color: var(--line); padding: 7px 12px; font-size: 13px; }
+.btn-danger { background: none; color: var(--danger); border-color: var(--danger); padding: 7px 12px; font-size: 13px; }
+.kbd { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.status { font-size: 14px; color: var(--ok); }
+.status.err { color: var(--danger); }
+
+/* List */
+.tools { display: flex; gap: 12px; align-items: center; }
+.tools input { flex: 1; }
+.list { display: flex; flex-direction: column; gap: 10px; }
+.empty { padding: 28px 18px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 12px; }
+details.item { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+details.item[open] { border-color: var(--muted); }
+summary { list-style: none; cursor: pointer; padding: 14px 16px; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; border-radius: 12px; }
+summary::-webkit-details-marker { display: none; }
+.s-name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.s-amt { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.s-meta { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.s-meta .tag { font-family: var(--f-mono); font-size: 12px; }
+.detail { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+.detail dl { margin: 0; display: grid; grid-template-columns: 1fr; gap: 12px; }
+.detail dt { font-family: var(--f-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.detail dd { margin: 2px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.detail .row-btns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--line); padding-top: 12px; }
+.confirm { font-size: 13px; color: var(--danger); }
+
+.toast { max-width: calc(100vw - 32px); position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: 14px; }
+@media (prefers-reduced-motion: no-preference) { .toast { transition: opacity .2s; } }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <header>
+    <h1>Informe de objeciones</h1>
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button type="button" role="tab" id="tab-nuevo" aria-selected="true" aria-controls="view-nuevo">Nuevo informe</button>
+      <button type="button" role="tab" id="tab-lista" aria-selected="false" aria-controls="view-lista">Informes <span class="n" id="count">0</span></button>
+    </nav>
+  </header>
+
+  <div id="notice" class="notice" hidden></div>
+
+  <section id="view-nuevo" role="tabpanel" aria-labelledby="tab-nuevo">
+    <form id="form" novalidate autocomplete="off">
+      <div class="editing" id="editing" hidden>
+        <span>Editando el informe de <b id="editing-name"></b></span>
+        <button type="button" class="btn btn-ghost" id="cancel-edit">Cancelar edición</button>
+      </div>
+
+      <fieldset>
+        <legend>La empresa</legend>
+        <div class="row">
+          <div class="field">
+            <label for="empresa">Empresa<span class="req" aria-hidden="true">*</span></label>
+            <input id="empresa" name="empresa" required placeholder="Nombre del cliente potencial">
+          </div>
+          <div class="field">
+            <label for="actividad">Actividad</label>
+            <input id="actividad" name="actividad" placeholder="A qué se dedica">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="fecha">Fecha<span class="req" aria-hidden="true">*</span></label>
+            <input id="fecha" name="fecha" type="date" required>
+          </div>
+          <div class="field">
+            <label for="cuantia">Cuantía de la oportunidad</label>
+            <div class="money"><input id="cuantia" name="cuantia" type="number" inputmode="decimal" min="0" step="any" placeholder="0"><span>€</span></div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Con quién hablaste</legend>
+        <div class="row">
+          <div class="field">
+            <label for="interlocutores">Interlocutor(es)</label>
+            <input id="interlocutores" name="interlocutores" placeholder="Nombres, separados por comas">
+          </div>
+          <div class="field">
+            <label for="puestos">Puesto(s)</label>
+            <input id="puestos" name="puestos" placeholder="En el mismo orden">
+          </div>
+        </div>
+        <div class="field" role="group" aria-labelledby="l-prod">
+          <span class="lbl" id="l-prod">Qué le interesa</span>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" id="p-web" value="Web"><span>Web</span></label>
+            <label class="chip"><input type="checkbox" id="p-redes" value="Redes"><span>Redes</span></label>
+            <label class="chip"><input type="checkbox" id="p-auto" value="Automatización"><span>Automatización</span></label>
+            <label class="chip"><input type="checkbox" id="p-otro" value="Otro"><span>Otro</span></label>
+          </div>
+          <input id="productosOtro" aria-label="Otro: especifica" placeholder="¿Qué otra cosa?" hidden>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Lo que pasó</legend>
+        <div class="field">
+          <label for="objeciones">Objeciones detectadas</label>
+          <p class="hint" id="h-obj">Una por línea, con las palabras exactas del cliente. Cuentan también las invisibles: lo que no preguntó o no te envió.</p>
+          <textarea id="objeciones" name="objeciones" rows="4" aria-describedby="h-obj"></textarea>
+        </div>
+        <div class="field">
+          <label for="puntosG">Puntos G</label>
+          <p class="hint" id="h-g">Lo que valoró y a lo que tú no le das importancia.</p>
+          <textarea id="puntosG" name="puntosG" rows="3" aria-describedby="h-g"></textarea>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="noFunciono">Qué no ha funcionado</label>
+            <textarea id="noFunciono" name="noFunciono" rows="3"></textarea>
+          </div>
+          <div class="field">
+            <label for="funciono">Qué ha funcionado</label>
+            <textarea id="funciono" name="funciono" rows="3"></textarea>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" id="submit">Guardar informe</button>
+        <span class="status" id="status" role="status" aria-live="polite"></span>
+      </div>
+    </form>
+  </section>
+
+  <section id="view-lista" role="tabpanel" aria-labelledby="tab-lista" hidden>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="tools">
+        <input id="buscar" type="search" placeholder="Buscar por empresa, objeción, persona…" aria-label="Buscar informes">
+      </div>
+      <div class="list" id="list">
+        <div class="empty">Todavía no hay informes. El primero que guardes aparecerá aquí, con el más reciente arriba.</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  const FIELDS = ["empresa", "actividad", "fecha", "cuantia", "interlocutores", "puestos", "objeciones", "puntosG", "noFunciono", "funciono"];
+  const PRODS = ["p-web", "p-redes", "p-auto", "p-otro"];
+  const prodText = (d) => Array.isArray(d.productos)
+    ? d.productos.map((p) => (p === "Otro" && d.productosOtro ? "Otro: " + d.productosOtro : p)).join(", ")
+    : String(d.productos || "");
+  const LABELS = { actividad: "Actividad", interlocutores: "Interlocutores", puestos: "Puestos", productos: "Qué le interesa", objeciones: "Objeciones detectadas", puntosG: "Puntos G", noFunciono: "Qué no ha funcionado", funciono: "Qué ha funcionado" };
+  const DRAFT_KEY = "informe-objeciones-borrador";
+  const $ = (id) => document.getElementById(id);
+  const form = $("form");
+
+  let ready = false;
+  let CLAVE = "";
+  let docs = [];
+  let editing = null; // {id, creado}
+  let canWrite = true;
+
+  // ---------- helpers ----------
+  const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+  const fmtDate = (s) => { if (!s) return ""; const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }); };
+  const fmtEur = (n) => (typeof n === "number" && isFinite(n)) ? n.toLocaleString("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }) : "";
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  let toastT;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2600); }
+  function notice(msg, err) { const n = $("notice"); if (!msg) { n.hidden = true; return; } n.textContent = msg; n.className = "notice" + (err ? " err" : ""); n.hidden = false; }
+  function errMsg(e) {
+    const m = String((e && e.message) || "");
+    if (m.indexOf("Clave") !== -1) return "Este enlace no es válido. Usa el enlace completo, con #k= al final.";
+    return "No se ha podido guardar. Revisa tu conexión y vuelve a intentarlo.";
+  }
+  const API = "https://script.google.com/macros/s/AKfycbxRFbSz28fTb0ceYnTtdy3LdnwrlNryNyW-KUm53FPAHGD8fzsiAcR5E-GenkaVbLQ8Rw/exec";
+  async function call(fn, arg) {
+    const body = { k: CLAVE, action: fn };
+    if (fn === "guardar") body.data = arg;
+    if (fn === "borrar") body.id = arg;
+    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || "Error");
+    return j.list;
+  }
+  function setDocs(list) {
+    docs = (list || []).slice().sort((a, b) => String(b.fecha || "").localeCompare(String(a.fecha || "")) || String(b.creado || "").localeCompare(String(a.creado || "")));
+    renderList();
+  }
+
+  // ---------- tabs ----------
+  function show(view) {
+    const nuevo = view === "nuevo";
+    $("tab-nuevo").setAttribute("aria-selected", String(nuevo));
+    $("tab-lista").setAttribute("aria-selected", String(!nuevo));
+    $("view-nuevo").hidden = !nuevo;
+    $("view-lista").hidden = nuevo;
+  }
+  $("tab-nuevo").addEventListener("click", () => show("nuevo"));
+  $("tab-lista").addEventListener("click", () => show("lista"));
+
+  // ---------- form values ----------
+  function readForm() {
+    const o = {};
+    FIELDS.forEach((k) => { o[k] = $(k).value.trim(); });
+    o.cuantia = o.cuantia === "" ? null : Number(o.cuantia);
+    if (o.cuantia !== null && !isFinite(o.cuantia)) o.cuantia = null;
+    o.productos = PRODS.filter((id) => $(id).checked).map((id) => $(id).value);
+    o.productosOtro = $("p-otro").checked ? $("productosOtro").value.trim() : "";
+    return o;
+  }
+  function syncOtro() { $("productosOtro").hidden = !$("p-otro").checked; }
+  function fillForm(o) {
+    FIELDS.forEach((k) => { $(k).value = o && o[k] != null ? String(o[k]) : ""; });
+    if (!$("fecha").value) $("fecha").value = today();
+    const sel = o && Array.isArray(o.productos) ? o.productos : [];
+    PRODS.forEach((id) => { $(id).checked = sel.includes($(id).value); });
+    $("productosOtro").value = (o && o.productosOtro) || "";
+    syncOtro();
+  }
+  $("p-otro").addEventListener("change", () => { syncOtro(); if ($("p-otro").checked) $("productosOtro").focus(); });
+  function resetForm() {
+    fillForm(null);
+    editing = null;
+    $("editing").hidden = true;
+    $("submit").textContent = "Guardar informe";
+    FIELDS.forEach((k) => $(k).classList.remove("invalid"));
+  }
+
+  // ---------- draft (per browser, convenience only) ----------
+  let draftT;
+  form.addEventListener("input", (e) => {
+    if (e.target && e.target.classList) e.target.classList.remove("invalid");
+    if (editing) return;
+    clearTimeout(draftT);
+    draftT = setTimeout(() => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(readForm())); } catch (_) {} }, 400);
+  });
+  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (_) {} }
+  (function restoreDraft() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch (_) {}
+    fillForm(d);
+  })();
+
+  // ---------- save ----------
+  let saving = false;
+  async function save() {
+    if (saving) return;
+    const data = readForm();
+    const missing = ["empresa", "fecha"].filter((k) => !data[k]);
+    if (missing.length) {
+      missing.forEach((k) => $(k).classList.add("invalid"));
+      $(missing[0]).focus();
+      setStatus("Falta " + (missing[0] === "empresa" ? "el nombre de la empresa." : "la fecha."), true);
+      return;
+    }
+    if (!ready) { setStatus("Todavía se está conectando. Espera un segundo y vuelve a pulsar.", true); return; }
+    saving = true; $("submit").disabled = true; setStatus("Guardando…");
+    const now = new Date().toISOString();
+    try {
+      const body = { ...data, id: editing ? editing.id : "", creado: editing ? (editing.creado || now) : now, actualizado: now };
+      let list;
+      try { list = await call("guardar", body); }
+      catch (e) { if (String((e && e.message) || "").indexOf("Clave") !== -1) throw e; await new Promise((r) => setTimeout(r, 800)); list = await call("guardar", body); }
+      setDocs(list);
+      const wasEditing = !!editing;
+      clearDraft(); resetForm(); setStatus("");
+      toast(wasEditing ? "Informe actualizado" : "Informe guardado");
+      if (wasEditing) show("lista");
+      window.scrollTo({ top: 0 });
+    } catch (e) {
+      setStatus(errMsg(e), true);
+    } finally {
+      saving = false; $("submit").disabled = !canWrite;
+    }
+  }
+  function setStatus(msg, err) { const s = $("status"); s.textContent = msg || ""; s.className = "status" + (err ? " err" : ""); }
+  form.addEventListener("submit", (e) => { e.preventDefault(); save(); });
+  form.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); save(); } });
+  $("cancel-edit").addEventListener("click", () => { resetForm(); show("lista"); });
+
+  // ---------- list ----------
+  function startEdit(d) {
+    editing = { id: d.id, creado: d.creado };
+    fillForm(d);
+    $("editing-name").textContent = d.empresa || "sin nombre";
+    $("editing").hidden = false;
+    $("submit").textContent = "Guardar cambios";
+    setStatus("");
+    show("nuevo");
+    window.scrollTo({ top: 0 });
+    $("empresa").focus();
+  }
+  function renderList() {
+    $("count").textContent = String(docs.length);
+    const q = $("buscar").value.trim().toLowerCase();
+    const list = $("list");
+    list.replaceChildren();
+    const shown = q ? docs.filter((d) => FIELDS.some((k) => String(d[k] ?? "").toLowerCase().includes(q)) || prodText(d).toLowerCase().includes(q)) : docs;
+    if (!docs.length) { list.append(el("div", "empty", "Todavía no hay informes. El primero que guardes aparecerá aquí, con el más reciente arriba.")); return; }
+    if (!shown.length) { list.append(el("div", "empty", "Ningún informe coincide con «" + $("buscar").value.trim() + "».")); return; }
+    shown.forEach((d) => {
+      const det = el("details", "item");
+      const sum = el("summary");
+      sum.append(el("span", "s-name", d.empresa || "Sin nombre"), el("span", "s-amt", fmtEur(d.cuantia)));
+      const nObj = String(d.objeciones || "").split("\n").map((s) => s.trim()).filter(Boolean).length;
+      const meta = el("span", "s-meta");
+      meta.append(el("span", "tag", fmtDate(d.fecha)));
+      meta.append(document.createTextNode("  ·  " + nObj + (nObj === 1 ? " objeción" : " objeciones") + (d.interlocutores ? "  ·  " + d.interlocutores : "")));
+      sum.append(meta);
+      det.append(sum);
+
+      const body = el("div", "detail");
+      const dl = el("dl");
+      Object.keys(LABELS).forEach((k) => {
+        const v = k === "productos" ? prodText(d) : d[k];
+        if (!v) return;
+        const w = el("div");
+        w.append(el("dt", null, LABELS[k]), el("dd", null, String(v)));
+        dl.append(w);
+      });
+      if (!dl.children.length) dl.append(el("div", "s-meta", "Sin más datos."));
+      body.append(dl);
+
+      const btns = el("div", "row-btns");
+      const bEdit = el("button", "btn btn-ghost", "Editar"); bEdit.type = "button";
+      const bDel = el("button", "btn btn-ghost", "Borrar"); bDel.type = "button";
+      bEdit.disabled = bDel.disabled = !canWrite;
+      bEdit.addEventListener("click", () => startEdit(d));
+      bDel.addEventListener("click", () => {
+        btns.replaceChildren();
+        const sure = el("span", "confirm", "¿Borrar este informe para siempre?");
+        const yes = el("button", "btn btn-danger", "Sí, borrar"); yes.type = "button";
+        const no = el("button", "btn btn-ghost", "No"); no.type = "button";
+        no.addEventListener("click", renderList);
+        yes.addEventListener("click", async () => {
+          yes.disabled = true;
+          try { setDocs(await call("borrar", d.id)); toast("Informe borrado"); }
+          catch (e) { toast(errMsg(e)); renderList(); }
+        });
+        btns.append(sure, yes, no);
+      });
+      btns.append(bEdit, bDel);
+      body.append(btns);
+      det.append(body);
+      list.append(det);
+    });
+  }
+  $("buscar").addEventListener("input", renderList);
+
+
+  // ---------- db ----------
+  (function connect() {
+    const m = /[#&?]k=([^&]+)/.exec(location.hash + "&" + location.search);
+    CLAVE = m ? decodeURIComponent(m[1]) : "";
+    const bad = () => {
+      canWrite = false; $("submit").disabled = true;
+      notice("Este enlace no es válido. Usa el enlace completo, con #k= al final.", true);
+    };
+    if (!CLAVE) { bad(); return; }
+    call("listar")
+      .then((list) => { ready = true; notice(""); setDocs(list); })
+      .catch((e) => {
+        if (String((e && e.message) || "").indexOf("Clave") !== -1) bad();
+        else { canWrite = false; $("submit").disabled = true; notice("No se pueden cargar los informes. Revisa la conexión y recarga la página.", true); }
+      });
+  })();
+})();
+</script>
+</body>
+</html>
